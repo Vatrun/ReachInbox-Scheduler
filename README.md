@@ -109,6 +109,17 @@ Frontend `.env.local`: `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_SECRET`, `N
 - `GET /api/emails/scheduled` and `GET /api/emails/sent` feed the dashboard
 - `POST /api/auth/register` and `POST /api/auth/login` handle email accounts
 
-## Known trade-offs
+## Assumptions, shortcuts and trade-offs
 
-Emails are sent as plain text, not HTML. The compose form has per-campaign delay and hourly limit fields; the delay controls how the scheduled times are spaced, but the enforced hourly cap is the per-sender value from `.env`. The backend endpoints themselves aren't auth protected, the dashboard is.
+- Emails are plain text only, no HTML or attachments. The detail view renders the raw body.
+- Rate limiting is per sender, using `MAX_EMAILS_PER_HOUR` from `.env`. The compose screen's "hourly limit" field is stored but the worker enforces the per-sender env value. The per-campaign "delay" field spaces out scheduled times; the global minimum between sends is a separate BullMQ limiter.
+- The minimum delay is enforced with BullMQ's limiter (one job per `MIN_DELAY_BETWEEN_EMAILS_MS`). It throttles job starts, not the SMTP send finishing, so a slow send can slightly overlap the next one.
+- Concurrency is set to 5, but the limiter caps send starts, so in practice throughput is one email per delay interval.
+- When the hourly limit is hit, jobs are moved back to the delayed set without counting a retry, so they wait for the next window instead of failing.
+- Idempotency comes from a unique constraint on (campaign, recipient), the API's `ON CONFLICT` skip, and the worker skipping already-sent rows. BullMQ job ids are auto-generated so they never clash with old completed jobs.
+- Senders are created by a seed script that makes real Ethereal accounts; the rate limit is tracked per sender. Re-running the seed without `--reset` just appends more senders.
+- The backend API routes are not auth protected, only the dashboard is gated by the login session.
+- Passwords are hashed with bcryptjs (pure JS) to avoid native build issues, at the cost of being a bit slower than native bcrypt.
+- Emails go to Ethereal's fake inbox, not real recipients. Each send logs a preview URL to read the message.
+- Migrations are a single `schema.sql` run by a script, no migration framework.
+- The star/archive/trash icons in the email detail view are visual only for now.
