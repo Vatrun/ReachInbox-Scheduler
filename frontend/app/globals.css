@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --brand-green: #00A844;
+  --google-btn-bg: #E8F5E9;
+  --input-bg: #F5F5F5;
+  --nav-active-bg: #E8F5E9;
+  --time-badge-bg: #FFF3E8;
+  --time-badge-text: #E8872E;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand-green: var(--brand-green);
+  --color-input-bg: var(--input-bg);
+  --color-nav-active-bg: var(--nav-active-bg);
+  --color-time-badge-bg: var(--time-badge-bg);
+  --color-time-badge-text: var(--time-badge-text);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}

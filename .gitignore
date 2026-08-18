@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# build outputs
+.next/
+out/
+dist/
+
+# env files (keep examples)
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+
+# misc
+.DS_Store
+*.pem
