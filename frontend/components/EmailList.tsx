@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Search, Filter, RefreshCw, Clock, Star } from "lucide-react";
 import { getScheduledEmails, getSentEmails } from "@/lib/api";
 import { EmailRow } from "@/types";
+import { formatDateTime } from "@/lib/format";
+import { EmailDetailView } from "@/components/EmailDetailView";
 
 function formatRecipient(email: string) {
   const local = email.split("@")[0];
@@ -12,22 +14,21 @@ function formatRecipient(email: string) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function formatScheduledTime(value: string) {
-  const date = new Date(value);
-  const day = date.toLocaleDateString("en-US", { weekday: "short" });
-  const time = date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-  return `${day} ${time}`;
-}
-
-export function EmailList({ view }: { view: "scheduled" | "sent" }) {
+export function EmailList({
+  view,
+  user,
+}: {
+  view: "scheduled" | "sent";
+  user: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  };
+}) {
   const [emails, setEmails] = useState<EmailRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState<EmailRow | null>(null);
 
   async function load() {
     setLoading(true);
@@ -48,6 +49,12 @@ export function EmailList({ view }: { view: "scheduled" | "sent" }) {
   useEffect(() => {
     load();
   }, [view]);
+
+  if (open) {
+    return (
+      <EmailDetailView email={open} user={user} onBack={() => setOpen(null)} />
+    );
+  }
 
   return (
     <div className="flex h-full flex-col">
@@ -96,7 +103,8 @@ export function EmailList({ view }: { view: "scheduled" | "sent" }) {
           emails.map((email) => (
             <div
               key={email.id}
-              className="flex items-center gap-5 px-8 py-5 transition hover:bg-gray-50/80"
+              onClick={() => setOpen(email)}
+              className="flex cursor-pointer items-center gap-5 px-8 py-5 transition hover:bg-gray-50/80"
             >
               <span className="w-40 shrink-0 text-sm font-semibold text-gray-900">
                 To: {formatRecipient(email.recipient_email)}
@@ -107,7 +115,7 @@ export function EmailList({ view }: { view: "scheduled" | "sent" }) {
                   <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-time-badge-bg px-3 py-1 text-xs font-medium whitespace-nowrap text-time-badge-text">
                     <Clock size={12} />
                     {email.scheduled_time &&
-                      formatScheduledTime(email.scheduled_time)}
+                      formatDateTime(email.scheduled_time)}
                   </span>
                   <span className="shrink-0 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium whitespace-nowrap text-gray-500">
                     Pending
@@ -127,7 +135,7 @@ export function EmailList({ view }: { view: "scheduled" | "sent" }) {
                   {email.sent_at && (
                     <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium whitespace-nowrap text-gray-500">
                       <Clock size={12} />
-                      {formatScheduledTime(email.sent_at)}
+                      {formatDateTime(email.sent_at)}
                     </span>
                   )}
                 </>

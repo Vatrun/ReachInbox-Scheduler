@@ -25,7 +25,7 @@ export function DashboardShell({ user }: DashboardShellProps) {
         {activeView === "compose" ? (
           <ComposeView onBack={() => setActiveView("scheduled")} />
         ) : (
-          <EmailList view={activeView} />
+          <EmailList view={activeView} user={user} />
         )}
       </div>
     </div>

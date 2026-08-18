@@ -12,6 +12,8 @@ export interface EmailRow {
   status: "pending" | "sent" | "failed";
   scheduled_time?: string;
   sent_at?: string | null;
+  sender_name?: string;
+  sender_email?: string;
 }
 
   export interface CreateCampaignBody {
