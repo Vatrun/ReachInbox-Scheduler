@@ -1,9 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Star, Archive, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Star,
+  Archive,
+  Trash2,
+  ChevronDown,
+} from "lucide-react";
 import { EmailRow } from "@/types";
-import { formatDateTime } from "@/lib/format";
+import { formatTimestamp } from "@/lib/format";
 
 interface EmailDetailViewProps {
   email: EmailRow;
@@ -12,19 +19,31 @@ interface EmailDetailViewProps {
     email?: string | null;
     image?: string | null;
   };
+  index: number;
+  total: number;
   onBack: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
 }
 
 function SenderAvatar({ name }: { name?: string | null }) {
-  const initial = (name || "S").trim().charAt(0).toUpperCase();
+  const initial = (name || "A").trim().charAt(0).toUpperCase();
   return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-nav-active-bg text-sm font-semibold text-brand-green">
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-green text-sm font-semibold text-white">
       {initial}
     </div>
   );
 }
 
-export function EmailDetailView({ email, user, onBack }: EmailDetailViewProps) {
+export function EmailDetailView({
+  email,
+  user,
+  index,
+  total,
+  onBack,
+  onPrev,
+  onNext,
+}: EmailDetailViewProps) {
   const [starred, setStarred] = useState(false);
   const time = email.status === "sent" ? email.sent_at : email.scheduled_time;
 
@@ -77,30 +96,65 @@ export function EmailDetailView({ email, user, onBack }: EmailDetailViewProps) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-4 px-8 py-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <SenderAvatar name={email.sender_name} />
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-gray-900">
-              {email.sender_name || "Sender"}
-            </p>
-            <p className="truncate text-xs text-gray-500">
-              to {email.recipient_email}
-            </p>
+      <div className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-3xl px-8">
+          <div className="flex items-center justify-between gap-4 py-4">
+            <div className="flex min-w-0 items-start gap-3">
+              <SenderAvatar name={email.sender_name} />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-gray-900">
+                  {email.sender_name || "Sender"}
+                  {email.sender_email && (
+                    <span className="font-normal text-gray-400">
+                      {" "}
+                      &lt;{email.sender_email}&gt;
+                    </span>
+                  )}
+                </p>
+                <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+                  to {email.recipient_email}
+                  <ChevronDown size={12} />
+                </p>
+              </div>
+            </div>
+            {time && (
+              <span className="shrink-0 text-xs text-gray-500">
+                {formatTimestamp(time)}
+              </span>
+            )}
+          </div>
+
+          <div className="py-4 text-sm whitespace-pre-wrap text-gray-800">
+            {email.body || "No body"}
           </div>
         </div>
-        {time && (
-          <span className="shrink-0 text-xs text-gray-500">
-            {formatDateTime(time)}
-          </span>
-        )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-8 pb-10">
-        <div className="rounded-xl bg-input-bg p-5 text-sm whitespace-pre-wrap text-gray-800">
-          {email.body || "No body"}
+      {(onPrev || onNext) && (
+        <div className="flex justify-center px-8 pb-6">
+          <div className="flex items-center gap-3 rounded-full border border-gray-200 bg-white px-4 py-1.5 shadow-sm">
+            <button
+              onClick={onPrev}
+              disabled={!onPrev}
+              aria-label="Previous email"
+              className="text-gray-400 transition hover:text-gray-600 disabled:opacity-40"
+            >
+              <ArrowLeft size={16} />
+            </button>
+            <span className="text-sm text-gray-600">
+              {index + 1} / {total}
+            </span>
+            <button
+              onClick={onNext}
+              disabled={!onNext}
+              aria-label="Next email"
+              className="text-gray-400 transition hover:text-gray-600 disabled:opacity-40"
+            >
+              <ArrowRight size={16} />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

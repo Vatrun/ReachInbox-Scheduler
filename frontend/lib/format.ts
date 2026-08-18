@@ -9,3 +9,17 @@ export function formatDateTime(value: string) {
   });
   return `${day} ${time}`;
 }
+
+export function formatTimestamp(value: string) {
+  const date = new Date(value);
+  const day = date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+  const time = date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `${day}, ${time}`;
+}

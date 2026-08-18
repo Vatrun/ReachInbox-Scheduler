@@ -51,8 +51,20 @@ export function EmailList({
   }, [view]);
 
   if (open) {
+    const index = emails.findIndex((e) => e.id === open.id);
+    const total = emails.length;
     return (
-      <EmailDetailView email={open} user={user} onBack={() => setOpen(null)} />
+      <EmailDetailView
+        email={open}
+        user={user}
+        index={index}
+        total={total}
+        onBack={() => setOpen(null)}
+        onPrev={index > 0 ? () => setOpen(emails[index - 1]) : undefined}
+        onNext={
+          index < total - 1 ? () => setOpen(emails[index + 1]) : undefined
+        }
+      />
     );
   }
 
