@@ -55,7 +55,7 @@ export function ComposeView({ onBack }: ComposeViewProps) {
         const list = await getSenders();
         if (cancelled) return;
         setSenders(list);
-        setSenderId((prev) => prev ?? (list[0]?.id ?? null));
+        setSenderId((prev) => prev ?? list[0]?.id ?? null);
       } catch {
         // backend down, leave the dropdown empty
       }
@@ -222,7 +222,9 @@ export function ComposeView({ onBack }: ComposeViewProps) {
       <div className="relative flex flex-1 overflow-hidden">
         <div className="flex-1 overflow-y-auto px-8 pb-8">
           {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
-          {success && <p className="mb-4 text-sm text-brand-green">{success}</p>}
+          {success && (
+            <p className="mb-4 text-sm text-brand-green">{success}</p>
+          )}
 
           <div className="flex flex-col gap-6">
             <Field label="From">
@@ -428,7 +430,9 @@ function Field({
 }) {
   return (
     <div className="flex items-start gap-6">
-      <label className="w-40 shrink-0 pt-2 text-sm text-gray-500">{label}</label>
+      <label className="w-40 shrink-0 pt-2 text-sm text-gray-500">
+        {label}
+      </label>
       <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
