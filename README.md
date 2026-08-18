@@ -57,6 +57,8 @@ npm run dev
 
 Open http://localhost:3000, log in, and hit Compose.
 
+You don't need any frontend env vars to get it running. `AUTH_SECRET` is optional (the app falls back to a dev secret), so email/password signup and login work straight away. Google login is the only thing that needs real credentials: create an OAuth client in the Google Cloud console and fill in `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`.
+
 ## How scheduling works
 
 When you schedule a campaign, the API saves one row per recipient in Postgres, then adds each one to BullMQ as a delayed job. The delay on each job is set so the job becomes ready right when that email should send. The worker picks the job up, checks the hourly limit for the sender, sends it through that sender's SMTP credentials, and marks the row as sent.
@@ -100,7 +102,7 @@ docker-compose.yml redis + postgres
 
 Backend `.env`: `DATABASE_URL`, `REDIS_HOST`, `REDIS_PORT`, `MIN_DELAY_BETWEEN_EMAILS_MS`, `MAX_EMAILS_PER_HOUR`, `WORKER_CONCURRENCY`. Check `.env.example` for defaults.
 
-Frontend `.env.local`: `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_SECRET`, `NEXT_PUBLIC_API_URL`. Google OAuth credentials come from the Google Cloud console.
+Frontend `.env.local` (all optional): `NEXT_PUBLIC_API_URL` (backend URL, defaults via `.env.example`), `AUTH_SECRET` (falls back to a dev secret), `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` (needed only for Google login, from the Google Cloud console).
 
 ## API
 
